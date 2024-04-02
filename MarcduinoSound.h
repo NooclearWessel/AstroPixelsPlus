@@ -44,10 +44,20 @@
 #define MP3_BANK4_SOUNDS 4  // sad sounds, numbered 076 to 100
 #define MP3_BANK5_SOUNDS 3  // whistle sounds, numbered 101 to 125
 // unless you change bank cutoff, these are ignored, so I set them to max
-#define MP3_BANK6_SOUNDS MP3_MAX_SOUNDS_PER_BANK    // scream sounds, numbered 126 to 150
-#define MP3_BANK7_SOUNDS MP3_MAX_SOUNDS_PER_BANK    // Leia sounds, numbered 151 to 175
-#define MP3_BANK8_SOUNDS MP3_MAX_SOUNDS_PER_BANK    // sing sounds (deprecated, not used by R2 Touch)
-#define MP3_BANK9_SOUNDS MP3_MAX_SOUNDS_PER_BANK // mus sounds, numbered 201 t0 225
+
+// --------------------------------------------Begin----------------------------------------------------------
+// NW - Customized to fit bank ranges available from "R2D2 Sounds MP3Trigger.zip" hosted by printed-droid:
+//        Landing Page: https://www.printed-droid.com/kb/r2d2-sounds/
+//        Direct:       https://1drv.ms/u/s!AjAI4z2V7k4Jp44qdhjrIPsBeHJOMw?e=25Uy6v
+// #define MP3_BANK6_SOUNDS MP3_MAX_SOUNDS_PER_BANK    // scream sounds, numbered 126 to 150
+// #define MP3_BANK7_SOUNDS MP3_MAX_SOUNDS_PER_BANK    // Leia sounds, numbered 151 to 175
+// #define MP3_BANK8_SOUNDS MP3_MAX_SOUNDS_PER_BANK    // sing sounds (deprecated, not used by R2 Touch)
+// #define MP3_BANK9_SOUNDS MP3_MAX_SOUNDS_PER_BANK // mus sounds, numbered 201 t0 225
+#define MP3_BANK6_SOUNDS 3    // scream sounds, numbered 126 to 150
+#define MP3_BANK7_SOUNDS 3    // Leia sounds, numbered 151 to 175
+#define MP3_BANK8_SOUNDS 22    // sing sounds (deprecated, not used by R2 Touch)
+#define MP3_BANK9_SOUNDS 1 // mus sounds, numbered 201 t0 225
+// ---------------------------------------------End-----------------------------------------------------------
 
 // this defines where the startup sound is
 #define MP3_EMPTY_SOUND 252 // workaround, used to stop sounds
@@ -152,8 +162,17 @@ public:
 
         else if (sound != 0)
         {
-            // calculate actual file number on the MP3 memory card
-            filenum = (bank - 1) * MP3_MAX_SOUNDS_PER_BANK + sound;
+
+// --------------------------------------------Begin----------------------------------------------------------
+// NW - The commented calculation only worked if all banks were filled with 25 songs each. Less than the max
+//        and the filenum could calculate from a later bank number
+            // filenum = (bank - 1) * MP3_MAX_SOUNDS_PER_BANK + sound;
+            
+            // Calculate the ending position of the last file in the prior bank, sequentially
+            int lastBankEndPos = bankEndPosition(bank);
+            // Calculate the position of the file on the card
+            filenum = lastBankEndPos + sound;
+// ---------------------------------------------End-----------------------------------------------------------
             // also adjust last sound played index for the next sound command
             // make sure not to go past max sounds
             if (sound > fMaxSounds[bank])
@@ -177,7 +196,13 @@ public:
                 // for banks that always play the first sound
                 sound = 1;
             }
-            filenum = (bank - 1) * MP3_MAX_SOUNDS_PER_BANK + sound;
+
+// --------------------------------------------Begin----------------------------------------------------------
+// NW - Same change as above
+            //filenum = (bank - 1) * MP3_MAX_SOUNDS_PER_BANK + sound;
+            int lastBankEndPos = bankEndPosition(bank);
+            filenum = lastBankEndPos + sound;
+// ---------------------------------------------End-----------------------------------------------------------            
         }
 
         switch (fModule)
@@ -245,6 +270,22 @@ public:
             }
         }
     }
+
+// --------------------------------------------Begin----------------------------------------------------------
+// NW - Loops through the array of bank counts (fMaxSounds), adding the values until we reach the requested
+//          bank. The result will be a pointer to the position of the last file from the prior bank.
+
+    int bankEndPosition(uint8_t bank) {
+        uint32_t bankEndPos = 0;
+        uint8_t bankIndex = bank-1; //Array starts with position 0, so bank #1 maps to fMaxSounds[0]
+
+        for (int i = 0; i < bankIndex; ++i) {
+            bankEndPos += fMaxSounds[i];
+        }
+
+        return bankEndPos;
+    } //bankEndPosition
+// ---------------------------------------------End-----------------------------------------------------------    
 
     void playRandom()
     {
@@ -324,7 +365,11 @@ public:
 
     void stopRandom()
     {
-        fRandomEnabled = true;
+// --------------------------------------------Begin----------------------------------------------------------
+// NW - Fixed issue where random was not stopping when called
+        //fRandomEnabled = true; 
+        fRandomEnabled = false;
+// ---------------------------------------------End-----------------------------------------------------------
     }
 
     void suspendRandom()

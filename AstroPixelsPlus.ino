@@ -134,17 +134,28 @@
 #define COMMAND_SERIAL Serial2
 
 ////////////////////////////////
-
-#define MARC_SERIAL2_BAUD_RATE 2400
+// --------------------------------------------Begin----------------------------------------------------------
+// NW - Changed baud rate to 9600 for serial communications between Penumbra ESP32 on Serial2
+// #define MARC_SERIAL2_BAUD_RATE 2400
+#define MARC_SERIAL2_BAUD_RATE 9600
+// ---------------------------------------------End-----------------------------------------------------------
 #define MARC_SERIAL_PASS true
 #define MARC_SERIAL_ENABLED true
 #define MARC_WIFI_ENABLED true
 #define MARC_WIFI_SERIAL_PASS true
-#define MARC_SOUND_PLAYER MarcSound::kDisabled
+// --------------------------------------------Begin----------------------------------------------------------
+// NW - Enabled kDFMini for use with generic DIYables DIY-MP3-PLAYER card using the GD3300B chip
+// #define MARC_SOUND_PLAYER MarcSound::kDisabled
+#define MARC_SOUND_PLAYER MarcSound::kDFMini
+// ---------------------------------------------End-----------------------------------------------------------
+
 #define MARC_SOUND_SERIAL 0
 #define MARC_SOUND_VOLUME 500 // 0 - 1000
 #define MARC_SOUND_STARTUP 255
-#define MARC_SOUND_RANDOM true
+// --------------------------------------------Begin----------------------------------------------------------
+// NW - Disbled random sounds by default. Made it difficult to troubleshoot the MP3 card
+#define MARC_SOUND_RANDOM false
+// ---------------------------------------------End-----------------------------------------------------------
 #define MARC_SOUND_RANDOM_MIN 5000
 #define MARC_SOUND_RANDOM_MAX 30000
 
